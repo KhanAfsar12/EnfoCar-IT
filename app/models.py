@@ -11,26 +11,17 @@ class PricingConfig(models.Model):
         ('SAT', 'Saturday'),
         ('SUN', 'Sunday'),
     ]
-    
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    # Distance Base Price
+    updated_at = models.DateTimeField(auto_now=True)   
     dbp_amount = models.DecimalField(max_digits=10, decimal_places=2)
     dbp_max_km = models.DecimalField(max_digits=5, decimal_places=2)
-    dbp_applicable_days = models.CharField(max_length=50, help_text="Comma-separated days (e.g. MON,TUE,WED)")
-    
-    # Distance Additional Price
-    dap_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    
-    # Time Multiplier Factor
+    dbp_applicable_days = models.CharField(max_length=50, help_text="Comma-separated days (e.g. MON,TUE,WED)")   
+    dap_amount = models.DecimalField(max_digits=10, decimal_places=2)  
     tmf_under_1h = models.DecimalField(max_digits=5, decimal_places=2)
     tmf_1h_to_2h = models.DecimalField(max_digits=5, decimal_places=2)
-    tmf_after_2h = models.DecimalField(max_digits=5, decimal_places=2)
-    
-    # Waiting Charges
+    tmf_after_2h = models.DecimalField(max_digits=5, decimal_places=2)  
     wc_free_minutes = models.PositiveIntegerField(default=3)
     wc_amount_per_block = models.DecimalField(max_digits=5, decimal_places=2)
     wc_block_duration = models.PositiveIntegerField(default=3, help_text="Minutes per block")

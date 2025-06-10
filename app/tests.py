@@ -1,4 +1,3 @@
-# pricing/tests.py
 from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import PricingConfig
@@ -11,7 +10,6 @@ class PricingModuleTests(TestCase):
         self.client = APIClient()
         self.user = User.objects.create_user(username='admin', password='password')
         
-        # Create a pricing config
         self.config = PricingConfig.objects.create(
             name="Test Config",
             is_active=True,
@@ -28,29 +26,27 @@ class PricingModuleTests(TestCase):
         )
     
     def test_price_calculation(self):
-        # Test case 1: Within base distance, under 1 hour, no waiting
         data = {
             'distance': 2.5,
             'ride_time': 45,
             'waiting_time': 2,
-            'date': '2023-06-01T12:00:00'  # Thursday
+            'date': '2023-06-01T12:00:00'
         }
         response = self.client.post('/api/calculate-price/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertAlmostEqual(response.data['price'], 80.0 + (45/60 * 1.0) + 0)
         
-        # Test case 2: Beyond base distance, over 1 hour, with waiting
         data = {
             'distance': 4.0,
             'ride_time': 75,
             'waiting_time': 5,
-            'date': '2023-06-03T12:00:00'  # Saturday
+            'date': '2023-06-03T12:00:00'
         }
         response = self.client.post('/api/calculate-price/', data, format='json')
         expected_price = (
-            80.0 +  # DBP
-            (1.0 * 30.0) +  # DAP for 1 extra km
-            (75/60 * 1.25) +  # Time component
-            (1 * 5.0)  # 1 block of waiting charges (5-3=2 mins, but we charge for whole block)
+            80.0 +
+            (1.0 * 30.0) +
+            (75/60 * 1.25) +
+            (1 * 5.0)
         )
         self.assertAlmostEqual(response.data['price'], expected_price)

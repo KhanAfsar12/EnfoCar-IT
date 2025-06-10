@@ -1,4 +1,3 @@
-# pricing/views.py
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,17 +11,14 @@ def calculate_price(request):
     data = request.data
     
     try:
-        # Convert inputs to Decimal for consistent arithmetic
-        distance = Decimal(str(data.get('distance', 0)))  # in KM
-        ride_time = Decimal(str(data.get('ride_time', 0)))  # in minutes
-        waiting_time = Decimal(str(data.get('waiting_time', 0)))  # in minutes
+        distance = Decimal(str(data.get('distance', 0)))
+        ride_time = Decimal(str(data.get('ride_time', 0)))
+        waiting_time = Decimal(str(data.get('waiting_time', 0)))
         date_str = data.get('date', timezone.now().isoformat())
         
-        # Parse date to get day of week
         ride_date = datetime.fromisoformat(date_str)
         day_of_week = ride_date.strftime('%a').upper()
         
-        # Get active pricing config
         config = PricingConfig.objects.filter(is_active=True).first()
         if not config:
             return Response(
@@ -30,7 +26,6 @@ def calculate_price(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Check if day is applicable
         applicable_days = [day.strip() for day in config.dbp_applicable_days.split(',')]
         if day_of_week not in applicable_days:
             return Response(
@@ -38,7 +33,6 @@ def calculate_price(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Calculate Distance Base Price
         if distance <= Decimal(config.dbp_max_km):
             dbp = Decimal(config.dbp_amount)
             additional_distance = Decimal(0)
@@ -46,10 +40,8 @@ def calculate_price(request):
             dbp = Decimal(config.dbp_amount)
             additional_distance = distance - Decimal(config.dbp_max_km)
         
-        # Calculate Distance Additional Price
         dap = additional_distance * Decimal(config.dap_amount)
         
-        # Calculate Time Multiplier Factor
         ride_hours = ride_time / Decimal(60)
         if ride_hours <= Decimal(1):
             tmf = Decimal(config.tmf_under_1h)
@@ -58,10 +50,8 @@ def calculate_price(request):
         else:
             tmf = Decimal(config.tmf_after_2h)
         
-        # Calculate Time Component
         time_component = (ride_time / Decimal(60)) * tmf
         
-        # Calculate Waiting Charges
         if waiting_time <= Decimal(config.wc_free_minutes):
             wc = Decimal(0)
         else:
@@ -71,7 +61,6 @@ def calculate_price(request):
                 blocks += Decimal(1)
             wc = blocks * Decimal(config.wc_amount_per_block)
         
-        # Final Price Calculation
         price = dbp + dap + time_component + wc
         
         response_data = {

@@ -1,4 +1,4 @@
-git clone https://github.com/yourusername/pricing_module.git
+git clone https://github.com/KhanAfsar12/EnfoCar-IT.git \n
 cd pricing_module
 
 python -m venv venv

@@ -1,4 +1,3 @@
-# pricing/admin.py
 from django.contrib import admin
 from .models import PricingConfig, PricingConfigLog
 from django import forms
@@ -26,7 +25,6 @@ class PricingConfigAdmin(admin.ModelAdmin):
     
     def save_model(self, request, obj, form, change):
         if change:
-            # Log changes
             original_obj = PricingConfig.objects.get(pk=obj.pk)
             changes = []
             for field in obj._meta.fields:
